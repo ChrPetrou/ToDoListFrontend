@@ -57,7 +57,7 @@ export default function Alona() {
     try {
       setToDoList(
         await axios
-          .get(`http://localhost:4000`)
+          .get(`http://localhost:4000/todo-list`)
           .then((res) => res.data)
           .catch((err) => console.log(err))
       );
