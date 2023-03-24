@@ -1,15 +1,21 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { IoMdAddCircleOutline } from "react-icons/io";
+import { AiFillDelete } from "react-icons/ai";
+import { BiCheckboxChecked, BiCheckbox } from "react-icons/bi";
+import * as Yup from "yup";
+import { Formik, Form, Field, validateYupSchema } from "formik";
+
 import colos from "../configs/colos";
+
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   margin: auto;
-  padding: 0 15px;
+  padding: 20px;
 `;
 
 const ContainerInner = styled.div`
@@ -19,13 +25,14 @@ const ContainerInner = styled.div`
   flex-direction: column;
   padding: 20px;
   gap: 20px;
+
   /* flex-direction: column; */
   border: 1px solid white;
-  border-radius: 25px;
+  border-radius: 8px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 800px;
   color: white;
-  background-color: ${colos.dark};
+  background-color: ${colos.purble};
   & h1 {
     font-weight: 900;
     border-bottom: 1px solid white;
@@ -39,21 +46,21 @@ const ContainerInner = styled.div`
 const ToDoListChildren = styled.div`
   width: 100%;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  /* flex-wrap: wrap; */
   justify-content: center;
   align-items: center;
   gap: 20px;
-
-  border-radius: 15px;
 `;
 
 const ToDoListChild = styled.div`
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: calc(100% / 3 - 60px / 3);
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(9, 43, 95);
+  width: 100%;
   min-width: 200px;
-  border: 1px solid white;
+  border: 1px solid black;
   /* flex: 2 1; */
   padding: 20px;
   gap: 20px;
@@ -63,47 +70,176 @@ const ToDoListChild = styled.div`
     font-size: 20px;
     width: 100%;
   }
+
+  & svg {
+    cursor: pointer;
+  }
 `;
 
-const AddNew = styled.div`
+const AddNewContainer = styled.div`
   display: flex;
-  /* flex-direction: column; */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  width: 100%;
   min-width: 200px;
-  border: 1px solid white;
-  /* flex: 2 1; */
-  padding: 10px;
-  background-color: ${colos.blue};
-  gap: 10px;
-  border-radius: 15px;
-  cursor: pointer;
+  margin-top: 20px;
+  border-top: 1px solid white;
+  padding: 20px;
+  gap: 20px;
+
+  & p,
+  span {
+    font-size: 20px;
+    width: 100%;
+  }
+
+  & svg {
+    cursor: pointer;
+  }
 `;
 
-function PopUp() {
-  const PopUpContainer = styled.div`
-    display: flex;
-    height: 100vh;
-  `;
-  return <PopUpContainer>Hello</PopUpContainer>;
-}
+const AddNewContainerInner = styled.form`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  flex: 1 1;
+  & input {
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+  }
+`;
+
+const AddNewContainerButton = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 0.5px solid white;
+`;
 
 export default function Home({ toDoList }) {
+  const [toDoListItem, setToDoListItem] = useState(toDoList);
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  const schema = Yup.object().shape({
+    text: Yup.string().required("Required"),
+  });
+
+  const todODelete = async (id) => {
+    // const itemtoDelete = await axios
+    //   .delete(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list/${id}`)
+    //   .then((res) => res.data)
+    //   .catch((err) => console.log(err));
+
+    const itemtoDelete = await axios
+      .delete(`http://localhost:4000/todo-list/${id}`)
+      .then((res) => res.data)
+      .catch((err) => console.log(err));
+
+    console.log(itemtoDelete);
+
+    setToDoListItem(toDoListItem.filter((a) => a.id !== itemtoDelete.id));
+  };
+
+  const todoComplete = async (id) => {
+    const itemtoUpdate = await axios
+      .patch(`http://localhost:4000/todo-list/${id}`, {
+        isCompleted: !isCompleted,
+      })
+      .then((res) => res.data)
+      .catch((err) => console.log(err));
+
+    setToDoListItem(
+      toDoListItem.map((curr, _) => {
+        if (curr.id == itemtoUpdate.id) {
+          return itemtoUpdate;
+        }
+        return curr;
+      })
+    );
+    setIsCompleted(!isCompleted);
+  };
+
+  const todoAdd = async (value) => {
+    console.log(value);
+    const itemToAdd = await axios
+      .post(`http://localhost:4000/todo-list`, {
+        text: value.text,
+      })
+      .then((res) => res.data)
+      .catch((err) => console.log(err));
+    setToDoListItem([...toDoListItem, itemToAdd]);
+  };
+
   return (
     <Container>
       <ContainerInner>
         <h1>To do List</h1>
         <ToDoListChildren>
-          {toDoList.map((element, index) => (
+          {toDoListItem.map((element, _) => (
             <ToDoListChild key={element.id}>
               <p>Task : {element.text}</p>
-              <span>Done : {element.isCompleted ? "yes" : "no"}</span>
+              {element.isCompleted ? (
+                <BiCheckboxChecked
+                  size={50}
+                  onClick={() => todoComplete(element.id)}
+                />
+              ) : (
+                <BiCheckbox
+                  size={50}
+                  onClick={() => todoComplete(element.id)}
+                />
+              )}
+              <AiFillDelete
+                size={50}
+                onClick={(e) => todODelete(element.id)}
+              ></AiFillDelete>
             </ToDoListChild>
           ))}
-          <AddNew onClick={() => PopUp()}>
-            <p>Add New</p>
-            <IoMdAddCircleOutline size={30} />
-          </AddNew>
+          <AddNewContainer>
+            <p>Add to the todo list</p>
+
+            <Formik
+              initialValues={{
+                text: "",
+              }}
+              validateYupSchema={schema}
+              onSubmit={(values) => {
+                todoAdd(values);
+              }}
+            >
+              {({
+                errors,
+                touched,
+                values,
+                handleChange,
+                handleSubmit,
+                setFieldValue,
+              }) => (
+                <AddNewContainerInner>
+                  <input
+                    name="text"
+                    type={"text"}
+                    onChange={handleChange}
+                    onInput={handleChange}
+                    placeholder="ADD ITEM"
+                  />
+
+                  <AddNewContainerButton onClick={() => handleSubmit()}>
+                    ADD TASK
+                    <IoMdAddCircleOutline size={30} />
+                  </AddNewContainerButton>
+                </AddNewContainerInner>
+              )}
+            </Formik>
+          </AddNewContainer>
         </ToDoListChildren>
       </ContainerInner>
     </Container>
@@ -112,7 +248,7 @@ export default function Home({ toDoList }) {
 
 export async function getServerSideProps(context) {
   const toDoList = await axios
-    .get(`http://localhost:4000/todo-list`)
+    .get(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list`)
     .then((res) => res.data)
     .catch((err) => console.log(err));
 

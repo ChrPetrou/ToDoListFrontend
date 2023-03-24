@@ -1,5 +1,5 @@
 export default {
-  dark: "#3c424a",
-  lightGrey: "#b8cae2",
+  purble: "rgb(26, 9, 48)",
+  lightGrey: "f7f1f1",
   blue: "#2d5a96",
 };
