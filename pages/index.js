@@ -112,7 +112,7 @@ export default function Home({ toDoList }) {
 
 export async function getServerSideProps(context) {
   const toDoList = await axios
-    .get(`http://localhost:4000`)
+    .get(`http://localhost:4000/todo-list`)
     .then((res) => res.data)
     .catch((err) => console.log(err));
 
