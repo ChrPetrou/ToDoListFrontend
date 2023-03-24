@@ -211,18 +211,12 @@ export default function Home({ toDoList }) {
                 text: "",
               }}
               validateYupSchema={schema}
-              onSubmit={(values) => {
+              onSubmit={(values, { resetForm }) => {
                 todoAdd(values);
+                resetForm({ values: "" });
               }}
             >
-              {({
-                errors,
-                touched,
-                values,
-                handleChange,
-                handleSubmit,
-                setFieldValue,
-              }) => (
+              {({ errors, touched, handleChange, handleSubmit }) => (
                 <AddNewContainerInner>
                   <input
                     name="text"
