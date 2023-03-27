@@ -4,8 +4,8 @@ import styled from "styled-components";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { AiFillDelete } from "react-icons/ai";
 import { BiCheckboxChecked, BiCheckbox } from "react-icons/bi";
-import * as Yup from "yup";
-import { Formik, Form, Field, validateYupSchema } from "formik";
+import * as yup from "yup";
+import { Formik } from "formik";
 
 import colos from "../configs/colos";
 
@@ -100,7 +100,7 @@ const AddNewContainer = styled.div`
   }
 `;
 
-const AddNewContainerInner = styled.form`
+const AddNewContainerInner = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -124,12 +124,34 @@ const AddNewContainerButton = styled.div`
   border: 0.5px solid white;
 `;
 
+const InputField = styled.div`
+  display: flex;
+  position: relative;
+`;
+
+const ErrorTag = styled.div`
+  color: ${colos.blue};
+  font-size: 20px;
+  font-weight: 900;
+  margin-top: 5px;
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  text-align: right;
+  top: 100%;
+  position: absolute;
+`;
+
 export default function Home({ toDoList }) {
   const [toDoListItem, setToDoListItem] = useState(toDoList);
   const [isCompleted, setIsCompleted] = useState(false);
 
-  const schema = Yup.object().shape({
-    text: Yup.string().required("Required"),
+  const schema = yup.object().shape({
+    text: yup
+      .string()
+      .min(2, "Too Short!")
+      .max(50, "Too Long!")
+      .required("Required"),
   });
 
   const todODelete = async (id) => {
@@ -197,10 +219,7 @@ export default function Home({ toDoList }) {
                   onClick={() => todoComplete(element.id)}
                 />
               )}
-              <AiFillDelete
-                size={50}
-                onClick={(e) => todODelete(element.id)}
-              ></AiFillDelete>
+              <AiFillDelete size={50} onClick={(e) => todODelete(element.id)} />
             </ToDoListChild>
           ))}
           <AddNewContainer>
@@ -208,23 +227,31 @@ export default function Home({ toDoList }) {
 
             <Formik
               initialValues={{
-                text: "",
+                task: "",
               }}
-              validateYupSchema={schema}
+              validationSchema={schema}
               onSubmit={(values, { resetForm }) => {
                 todoAdd(values);
+                console.log(values);
                 resetForm({ values: "" });
               }}
+              validateOnChange={true}
+              validateOnMount={false}
             >
-              {({ errors, touched, handleChange, handleSubmit }) => (
+              {({ errors, handleSubmit, handleChange, touched }) => (
                 <AddNewContainerInner>
-                  <input
-                    name="text"
-                    type={"text"}
-                    onChange={handleChange}
-                    onInput={handleChange}
-                    placeholder="ADD ITEM"
-                  />
+                  <InputField>
+                    <input
+                      name="text"
+                      type="text"
+                      onChange={handleChange}
+                      onInput={handleChange}
+                      placeholder="ADD ITEM"
+                    />
+                    {errors.text && touched.text && (
+                      <ErrorTag>{errors.text} </ErrorTag>
+                    )}
+                  </InputField>
 
                   <AddNewContainerButton onClick={() => handleSubmit()}>
                     ADD TASK
