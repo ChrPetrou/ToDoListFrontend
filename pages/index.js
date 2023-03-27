@@ -6,6 +6,7 @@ import { AiFillDelete, AiFillEdit } from "react-icons/ai";
 import { BiCheckboxChecked, BiCheckbox } from "react-icons/bi";
 import * as yup from "yup";
 import { Formik } from "formik";
+import { useRouter } from "next/router";
 
 import colos from "../configs/colos";
 
@@ -45,12 +46,20 @@ const ContainerInner = styled.div`
 
 const ToDoListChildren = styled.div`
   width: 100%;
+  height: 550px;
+  padding: 20px 0;
+  overflow-y: scroll;
   display: flex;
   flex-direction: column;
   /* flex-wrap: wrap; */
-  justify-content: center;
-  align-items: center;
+  /* justify-content: center;
+  align-items: center; */
   gap: 20px;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 `;
 
 const ToDoListChild = styled.div`
@@ -90,6 +99,36 @@ const TaskDetails = styled.div`
 
   & svg {
     cursor: pointer;
+  }
+`;
+
+const CheckBox = styled.div`
+  display: flex;
+  margin: auto;
+  cursor: pointer;
+  background: white;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  position: relative;
+
+  ::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    transform: rotate(295deg);
+    opacity: ${({ isCompleted }) => (isCompleted ? 1 : 0)};
+    top: 0;
+    bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    border-bottom: 3px solid ${colos.blue};
+    border-left: 3px solid ${colos.blue};
   }
 `;
 
@@ -186,15 +225,16 @@ export default function Home({ toDoList }) {
 
     setToDoListItem(toDoListItem.filter((a) => a.id !== itemtoDelete.id));
   };
-
-  const todoComplete = async (id) => {
+  const router = useRouter();
+  const todoComplete = async (element) => {
     const itemtoUpdate = await axios
-      .patch(`http://localhost:4000/todo-list/${id}`, {
-        isCompleted: !isCompleted,
+      .patch(`http://localhost:4000/todo-list/${element.id}`, {
+        isCompleted: !element.isCompleted,
       })
       .then((res) => res.data)
       .catch((err) => console.log(err));
-
+    router.reload();
+    setIsCompleted(!isCompleted);
     setToDoListItem(
       toDoListItem.map((curr, _) => {
         if (curr.id == itemtoUpdate.id) {
@@ -203,7 +243,6 @@ export default function Home({ toDoList }) {
         return curr;
       })
     );
-    setIsCompleted(!isCompleted);
   };
 
   const todoAdd = async (value) => {
@@ -222,7 +261,7 @@ export default function Home({ toDoList }) {
       <ContainerInner>
         <h1>To do List</h1>
         <ToDoListChildren>
-          {toDoListItem.map((element, _) => (
+          {toDoList.map((element, _) => (
             <ToDoListChild key={element.id}>
               <TaskDetails>
                 <p>Task : {element.text}</p>
@@ -232,14 +271,16 @@ export default function Home({ toDoList }) {
                 {element.isCompleted ? (
                   <BiCheckboxChecked
                     size={50}
-                    onClick={() => todoComplete(element.id)}
+                    onClick={() => todoComplete(element)}
                   />
                 ) : (
-                  <BiCheckbox
-                    size={50}
-                    onClick={() => todoComplete(element.id)}
-                  />
+                  <BiCheckbox size={50} onClick={() => todoComplete(element)} />
                 )}
+                {/* <CheckBox
+                  isCompleted={element.isCompleted}
+                  onClick={() => todoComplete(element)}
+                /> */}
+
                 <AiFillDelete
                   size={50}
                   onClick={(e) => todODelete(element.id)}
@@ -247,46 +288,46 @@ export default function Home({ toDoList }) {
               </TaskDetails>
             </ToDoListChild>
           ))}
-          <AddNewContainer>
-            <p>Add to the todo list</p>
-
-            <Formik
-              initialValues={{
-                task: "",
-              }}
-              validationSchema={schema}
-              onSubmit={(values, { resetForm }) => {
-                todoAdd(values);
-                console.log(values);
-                resetForm({ values: "" });
-              }}
-              validateOnChange={true}
-              validateOnMount={false}
-            >
-              {({ errors, handleSubmit, handleChange, touched }) => (
-                <AddNewContainerInner>
-                  <InputField>
-                    <input
-                      name="text"
-                      type="text"
-                      onChange={handleChange}
-                      onInput={handleChange}
-                      placeholder="ADD ITEM"
-                    />
-                    {errors.text && touched.text && (
-                      <ErrorTag>{errors.text} </ErrorTag>
-                    )}
-                  </InputField>
-
-                  <AddNewContainerButton onClick={() => handleSubmit()}>
-                    ADD TASK
-                    <IoMdAddCircleOutline size={30} />
-                  </AddNewContainerButton>
-                </AddNewContainerInner>
-              )}
-            </Formik>
-          </AddNewContainer>
         </ToDoListChildren>
+        <AddNewContainer>
+          <p>Add to the todo list</p>
+
+          <Formik
+            initialValues={{
+              text: "",
+            }}
+            validationSchema={schema}
+            onSubmit={(values, { resetForm }) => {
+              todoAdd(values);
+              console.log(values);
+              resetForm({ text: "" });
+            }}
+            validateOnChange={true}
+            validateOnMount={false}
+          >
+            {({ errors, handleSubmit, handleChange, touched, values }) => (
+              <AddNewContainerInner>
+                <InputField>
+                  <input
+                    name="text"
+                    type="text"
+                    onChange={handleChange}
+                    placeholder="ADD ITEM"
+                    value={values.text}
+                  />
+                  {errors.text && touched.text && (
+                    <ErrorTag>{errors.text} </ErrorTag>
+                  )}
+                </InputField>
+
+                <AddNewContainerButton onClick={() => handleSubmit()}>
+                  ADD TASK
+                  <IoMdAddCircleOutline size={30} />
+                </AddNewContainerButton>
+              </AddNewContainerInner>
+            )}
+          </Formik>
+        </AddNewContainer>
       </ContainerInner>
     </Container>
   );
