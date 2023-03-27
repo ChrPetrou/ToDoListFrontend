@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import styled from "styled-components";
 import { IoMdAddCircleOutline } from "react-icons/io";
-import { AiFillDelete } from "react-icons/ai";
+import { AiFillDelete, AiFillEdit } from "react-icons/ai";
 import { BiCheckboxChecked, BiCheckbox } from "react-icons/bi";
 import * as yup from "yup";
 import { Formik } from "formik";
@@ -55,7 +55,8 @@ const ToDoListChildren = styled.div`
 
 const ToDoListChild = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  /* justify-content: center; */
   align-items: center;
   background-color: rgb(9, 43, 95);
   width: 100%;
@@ -65,6 +66,22 @@ const ToDoListChild = styled.div`
   padding: 20px;
   gap: 20px;
   border-radius: 15px;
+  & p,
+  span {
+    font-size: 20px;
+    width: 100%;
+  }
+
+  & svg {
+    cursor: pointer;
+  }
+`;
+
+const TaskDetails = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
   & p,
   span {
     font-size: 20px;
@@ -207,19 +224,27 @@ export default function Home({ toDoList }) {
         <ToDoListChildren>
           {toDoListItem.map((element, _) => (
             <ToDoListChild key={element.id}>
-              <p>Task : {element.text}</p>
-              {element.isCompleted ? (
-                <BiCheckboxChecked
+              <TaskDetails>
+                <p>Task : {element.text}</p>
+                <AiFillEdit size={15} />
+              </TaskDetails>
+              <TaskDetails>
+                {element.isCompleted ? (
+                  <BiCheckboxChecked
+                    size={50}
+                    onClick={() => todoComplete(element.id)}
+                  />
+                ) : (
+                  <BiCheckbox
+                    size={50}
+                    onClick={() => todoComplete(element.id)}
+                  />
+                )}
+                <AiFillDelete
                   size={50}
-                  onClick={() => todoComplete(element.id)}
+                  onClick={(e) => todODelete(element.id)}
                 />
-              ) : (
-                <BiCheckbox
-                  size={50}
-                  onClick={() => todoComplete(element.id)}
-                />
-              )}
-              <AiFillDelete size={50} onClick={(e) => todODelete(element.id)} />
+              </TaskDetails>
             </ToDoListChild>
           ))}
           <AddNewContainer>
