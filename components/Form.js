@@ -4,8 +4,10 @@ import { Formik } from "formik";
 import styled from "styled-components";
 import colos from "../configs/colos";
 import { IoMdAddCircleOutline } from "react-icons/io";
+import { RxUpdate } from "react-icons/rx";
 const AddNewContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -30,10 +32,13 @@ const AddNewContainer = styled.div`
 
 const AddNewContainerInner = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   justify-content: space-between;
   width: 100%;
   flex: 1 1;
   & input {
+    width: 100%;
     font-size: 20px;
     padding: 10px;
     border-radius: 8px;
@@ -50,6 +55,10 @@ const AddNewContainerButton = styled.div`
   border-radius: 8px;
   cursor: pointer;
   border: 0.5px solid white;
+  transition: all 0.15s linear;
+  :hover {
+    background: rgb(0, 0, 0, 0.5);
+  }
 `;
 
 const InputField = styled.div`
@@ -70,7 +79,7 @@ const ErrorTag = styled.div`
   position: absolute;
 `;
 
-const Form = ({ BtnText, onClick, item }) => {
+const Form = ({ BtnText, onSubmit, item, width }) => {
   const schema = yup.object().shape({
     text: yup
       .string()
@@ -79,15 +88,21 @@ const Form = ({ BtnText, onClick, item }) => {
       .required("Required"),
   });
 
+  const handleKey = (e) => {
+    if (e.key === "Enter") {
+      console.log("do validate");
+    }
+  };
+
   return (
-    <AddNewContainer>
+    <AddNewContainer max={width}>
       <Formik
         initialValues={{
           text: item ? item?.text : "",
         }}
         validationSchema={schema}
         onSubmit={(values, { resetForm }) => {
-          onClick(values, item?.id);
+          onSubmit(values);
           resetForm({ text: "" });
         }}
         validateOnChange={true}
@@ -95,7 +110,7 @@ const Form = ({ BtnText, onClick, item }) => {
       >
         {({ errors, handleSubmit, handleChange, touched, values }) => (
           <AddNewContainerInner>
-            <InputField>
+            <InputField onKeyDown={() => handleKey}>
               <input
                 name="text"
                 type="text"
@@ -110,7 +125,11 @@ const Form = ({ BtnText, onClick, item }) => {
 
             <AddNewContainerButton onClick={() => handleSubmit()}>
               {BtnText} TASK
-              <IoMdAddCircleOutline size={30} />
+              {item ? (
+                <RxUpdate size={25} />
+              ) : (
+                <IoMdAddCircleOutline size={30} />
+              )}
             </AddNewContainerButton>
           </AddNewContainerInner>
         )}
