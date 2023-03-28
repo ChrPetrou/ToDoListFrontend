@@ -1,13 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { IoMdAddCircleOutline } from "react-icons/io";
-import { AiFillDelete, AiFillEdit } from "react-icons/ai";
+import { AiFillDelete, AiFillEdit, AiOutlineClose } from "react-icons/ai";
 import { BiCheckboxChecked, BiCheckbox } from "react-icons/bi";
-import * as yup from "yup";
-import { Formik } from "formik";
 import { useRouter } from "next/router";
 import colos from "../configs/colos";
+import Form from "../components/Form";
 
 const Container = styled.div`
   display: flex;
@@ -20,13 +18,13 @@ const Container = styled.div`
 
 const ContainerInner = styled.div`
   display: flex;
+  position: relative;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   padding: 20px;
   gap: 20px;
-
-  /* flex-direction: column; */
+  overflow: hidden;
   border: 1px solid white;
   border-radius: 8px;
   width: 100%;
@@ -36,15 +34,13 @@ const ContainerInner = styled.div`
   & h1 {
     font-weight: 900;
     border-bottom: 1px solid white;
-    /* width: 100%; */
-
     margin: auto;
-    /* align-self: center; */
   }
 `;
 
 const ToDoListChildren = styled.div`
   width: 100%;
+
   height: 550px;
   padding: 20px 0;
   overflow-y: scroll;
@@ -63,6 +59,7 @@ const ToDoListChildren = styled.div`
 
 const ToDoListChild = styled.div`
   display: flex;
+
   justify-content: space-between;
   /* justify-content: center; */
   align-items: center;
@@ -131,84 +128,47 @@ const CheckBox = styled.div`
   }
 `;
 
-const AddNewContainer = styled.div`
+const PopUpContainer = styled.div`
+  display: flex;
+  align-items: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+  z-index: 1;
+
+  backdrop-filter: blur(10px);
+`;
+
+const PopUpContainerInner = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
 
+  border-radius: 8px;
+  padding: 10px;
+  margin: 20px;
   width: 100%;
-  min-width: 200px;
-  margin-top: 20px;
-  border-top: 1px solid white;
-  padding: 20px;
-  gap: 20px;
+  /* height: 200px; */
+`;
 
-  & p,
-  span {
-    font-size: 20px;
-    width: 100%;
-  }
-
-  & svg {
+const ClosePopUp = styled.div`
+  display: flex;
+  width: 100%;
+  & > svg {
+    margin-left: auto;
     cursor: pointer;
   }
 `;
 
-const AddNewContainerInner = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  flex: 1 1;
-  & input {
-    font-size: 20px;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-  }
-`;
-
-const AddNewContainerButton = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  gap: 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  border: 0.5px solid white;
-`;
-
-const InputField = styled.div`
-  display: flex;
-  position: relative;
-`;
-
-const ErrorTag = styled.div`
-  color: ${colos.blue};
-  font-size: 20px;
-  font-weight: 900;
-  margin-top: 5px;
-  display: flex;
-  width: 100%;
-  justify-content: flex-end;
-  text-align: right;
-  top: 100%;
-  position: absolute;
-`;
-
 export default function Alona() {
   const [toDoList, setToDoList] = useState([]);
-
+  const [popUpItem, setPopUpItem] = useState({ state: false, value: null });
   const [isCompleted, setIsCompleted] = useState(false);
-
-  const schema = yup.object().shape({
-    text: yup
-      .string()
-      .min(2, "Too Short!")
-      .max(50, "Too Long!")
-      .required("Required"),
-  });
 
   const TodoFunction = async () => {
     try {
@@ -231,8 +191,6 @@ export default function Alona() {
     setToDoList(toDoList.filter((a) => a.id !== itemtoDelete.id));
   };
 
-  const router = useRouter();
-
   const todoComplete = async (element) => {
     const itemtoUpdate = await axios
       .patch(`http://localhost:4000/todo-list/${element.id}`, {
@@ -251,84 +209,99 @@ export default function Alona() {
     );
   };
 
+  const todoAdd = async (value) => {
+    console.log(value);
+    const itemToAdd = await axios
+      .post(`http://localhost:4000/todo-list`, {
+        text: value.text,
+      })
+      .then((res) => res.data)
+      .catch((err) => console.log(err));
+    setToDoList([...toDoList, itemToAdd]);
+  };
+
   useEffect(() => {
     return () => {
       TodoFunction();
     };
   }, []);
 
+  const todoUpdate = async (element, id) => {
+    const itemtoUpdate = await axios
+      .patch(`http://localhost:4000/todo-list/${id}`, {
+        text: element.text,
+      })
+      .then((res) => res.data)
+      .catch((err) => console.log(err));
+    setPopUpItem({ state: false });
+    setToDoList(
+      toDoList.map((curr, _) => {
+        if (curr.id == itemtoUpdate.id) {
+          return itemtoUpdate;
+        }
+        return curr;
+      })
+    );
+  };
+
+  const PopUp = ({ isPopUp: PopUpItem, setIsPopUp: setPopUpItem }) => {
+    return (
+      <PopUpContainer>
+        <PopUpContainerInner>
+          <ClosePopUp>
+            <AiOutlineClose
+              size={35}
+              onClick={() => setPopUpItem({ state: false })}
+            />
+          </ClosePopUp>
+
+          <Form
+            onClick={todoUpdate}
+            item={PopUpItem.value}
+            BtnText={"UPDATE"}
+          />
+        </PopUpContainerInner>
+      </PopUpContainer>
+    );
+  };
+
   return (
     <Container>
       <ContainerInner>
         <h1>To do List</h1>
         <ToDoListChildren>
+          {popUpItem.state === true && (
+            <PopUp isPopUp={popUpItem} setIsPopUp={setPopUpItem} />
+          )}
           {toDoList.map((element, _) => (
             <ToDoListChild key={element.id}>
               <TaskDetails>
                 <p>Task : {element.text}</p>
-                <AiFillEdit size={15} />
+                <AiFillEdit
+                  size={20}
+                  onClick={() =>
+                    setPopUpItem({ state: !popUpItem.state, value: element })
+                  }
+                />
               </TaskDetails>
               <TaskDetails>
                 {element.isCompleted ? (
                   <BiCheckboxChecked
-                    size={50}
+                    size={30}
                     onClick={() => todoComplete(element)}
                   />
                 ) : (
-                  <BiCheckbox size={50} onClick={() => todoComplete(element)} />
+                  <BiCheckbox size={30} onClick={() => todoComplete(element)} />
                 )}
-                {/* <CheckBox
-                  isCompleted={element.isCompleted}
-                  onClick={() => todoComplete(element)}
-                /> */}
-
                 <AiFillDelete
-                  size={50}
+                  size={25}
                   onClick={(e) => todODelete(element.id)}
                 />
               </TaskDetails>
             </ToDoListChild>
           ))}
         </ToDoListChildren>
-        <AddNewContainer>
-          <p>Add to the todo list</p>
-
-          <Formik
-            initialValues={{
-              text: "",
-            }}
-            validationSchema={schema}
-            onSubmit={(values, { resetForm }) => {
-              todoAdd(values);
-              console.log(values);
-              resetForm({ text: "" });
-            }}
-            validateOnChange={true}
-            validateOnMount={false}
-          >
-            {({ errors, handleSubmit, handleChange, touched, values }) => (
-              <AddNewContainerInner>
-                <InputField>
-                  <input
-                    name="text"
-                    type="text"
-                    onChange={handleChange}
-                    placeholder="ADD ITEM"
-                    value={values.text}
-                  />
-                  {errors.text && touched.text && (
-                    <ErrorTag>{errors.text} </ErrorTag>
-                  )}
-                </InputField>
-
-                <AddNewContainerButton onClick={() => handleSubmit()}>
-                  ADD TASK
-                  <IoMdAddCircleOutline size={30} />
-                </AddNewContainerButton>
-              </AddNewContainerInner>
-            )}
-          </Formik>
-        </AddNewContainer>
+        <Form onClick={todoAdd} BtnText={"ADD"} />
       </ContainerInner>
     </Container>
   );
