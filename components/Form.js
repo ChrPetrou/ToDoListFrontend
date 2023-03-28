@@ -57,7 +57,7 @@ const AddNewContainerButton = styled.div`
   border: 0.5px solid white;
   transition: all 0.15s linear;
   :hover {
-    background: rgb(0, 0, 0, 0.5);
+    background: rgba(9, 43, 95, 0.5);
   }
 `;
 

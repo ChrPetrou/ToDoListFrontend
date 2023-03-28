@@ -6,6 +6,7 @@ import useDebounce from "../util/useDebounce";
 import axios from "axios";
 import PopUp from "./PopUp";
 import Form from "./Form";
+import todoAPIAgent from "../util/todoAPIAgent";
 
 const ToDoListChild = styled.div`
   display: flex;
@@ -81,23 +82,21 @@ const TaskManagment = styled.div`
 const TodoChild = ({ element, refetch, width }) => {
   const [isCompleted, setIsCompleted] = useState(element.isCompleted);
   const [showPopup, setShowPopup] = useState(false);
+  const [errosMsg, setErrosMsg] = useState();
+
   useDebounce(isCompleted, 1000, () => {
     todoUpdate({ ...element, isCompleted });
   });
 
   const deleteSelf = async () => {
-    await axios
-      .delete(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list/${element.id}`)
-      .then((res) => res.data)
-      .catch((err) => console.log(err));
+    await todoAPIAgent.deleteTodo(element.id).catch((err) => setErrosMsg(err));
     refetch();
   };
 
   const todoUpdate = async ({ id, isCompleted, text }) => {
-    await axios.patch(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list/${id}`, {
-      text,
-      isCompleted,
-    });
+    await todoAPIAgent
+      .todoUpdate({ id, isCompleted, text })
+      .catch((err) => setErrosMsg(err));
     setShowPopup(false);
     refetch();
   };

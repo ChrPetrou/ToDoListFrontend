@@ -4,6 +4,7 @@ import styled from "styled-components";
 import colos from "../configs/colos";
 import Form from "../components/Form";
 import TodoChild from "../components/TodoChild";
+import todoAPIAgent from "../util/todoAPIAgent";
 
 const Container = styled.div`
   display: flex;
@@ -53,29 +54,20 @@ const ToDoListChildren = styled.div`
 
 export default function Alona() {
   const [toDoList, setToDoList] = useState([]);
+  const [errosMsg, setErrosMsg] = useState();
   const ref = useRef();
 
   const TodoFunction = async () => {
     try {
-      setToDoList(
-        await axios
-          .get(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list`)
-          .then((res) => res.data)
-          .catch((err) => console.log(err))
-      );
-    } catch {
-      (err) => console.log(err.message);
+      const todoList = await todoAPIAgent.getAllTodos();
+      setToDoList(todoList);
+    } catch (err) {
+      setErrosMsg(err);
     }
   };
 
   const todoAdd = async (value) => {
-    console.log(value);
-    await axios
-      .post(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list`, {
-        text: value.text,
-      })
-      .then((res) => res.data)
-      .catch((err) => console.log(err));
+    await todoAPIAgent.createTodo(value).catch((err) => setErrosMsg(err));
     TodoFunction();
   };
 
@@ -94,7 +86,7 @@ export default function Alona() {
             <TodoChild
               key={element.id}
               element={element}
-              width={ref.current.clientWidth}
+              width={ref.current.clientWidth - 20}
               refetch={TodoFunction}
             />
           ))}
