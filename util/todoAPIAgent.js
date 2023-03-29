@@ -19,8 +19,8 @@ const todoAPIAgent = {
   deleteTodo: async (id) => {
     return todoAPIAxios.delete(`/todo-list/${id}`).then((res) => res.data);
   },
-  todoUpdate: async ({ id, isCompleted, text }) => {
-    return axios.patch(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list/${id}`, {
+  todoUpdate: async ({ _id, isCompleted, text }) => {
+    return axios.patch(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list/${_id}`, {
       text,
       isCompleted,
     });

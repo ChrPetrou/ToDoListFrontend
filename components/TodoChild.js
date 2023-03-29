@@ -89,20 +89,20 @@ const TodoChild = ({ element, refetch, width }) => {
   });
 
   const deleteSelf = async () => {
-    await todoAPIAgent.deleteTodo(element.id).catch((err) => setErrosMsg(err));
+    await todoAPIAgent.deleteTodo(element._id).catch((err) => setErrosMsg(err));
     refetch();
   };
 
-  const todoUpdate = async ({ id, isCompleted, text }) => {
+  const todoUpdate = async ({ _id, isCompleted, text }) => {
     await todoAPIAgent
-      .todoUpdate({ id, isCompleted, text })
+      .todoUpdate({ _id, isCompleted, text })
       .catch((err) => setErrosMsg(err));
     setShowPopup(false);
     refetch();
   };
   return (
     <>
-      <ToDoListChild key={element.id}>
+      <ToDoListChild>
         <TaskDetails isCompleted={isCompleted}>
           <p>Task : {element.text}</p>
           <AiFillEdit
