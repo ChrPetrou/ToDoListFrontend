@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import colos from "../configs/colos";

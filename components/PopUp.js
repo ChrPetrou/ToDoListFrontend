@@ -1,17 +1,6 @@
 import styled from "styled-components";
 import { AiOutlineClose } from "react-icons/ai";
 
-// const PopUpBg = styled.div`
-//   position: fixed;
-//   z-index: 1;
-//   width: 100vw;
-//   height: 100vh;
-//   top: 0;
-//   left: 0;
-//   z-index: 10;
-//   backdrop-filter: blur(10px);
-// `;
-
 const PopUpContainer = styled.div`
   display: flex;
   backdrop-filter: blur(10px);
