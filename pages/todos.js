@@ -51,9 +51,10 @@ const ToDoListChildren = styled.div`
   scrollbar-width: none; /* Firefox */
 `;
 
-export default function Alona() {
+export default function Todo() {
   const [toDoList, setToDoList] = useState([]);
   const [errosMsg, setErrosMsg] = useState();
+
   const ref = useRef();
 
   const TodoFunction = async () => {
@@ -71,10 +72,8 @@ export default function Alona() {
   };
 
   useEffect(() => {
-    return () => {
-      TodoFunction();
-    };
-  }, []);
+    TodoFunction();
+  }, [toDoList]);
 
   return (
     <Container>
@@ -83,7 +82,7 @@ export default function Alona() {
         <ToDoListChildren>
           {toDoList.map((element, _) => (
             <TodoChild
-              key={element.id}
+              key={element._id}
               element={element}
               width={ref.current.clientWidth - 20}
               refetch={TodoFunction}

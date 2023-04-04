@@ -83,6 +83,7 @@ const TodoChild = ({ element, refetch, width }) => {
   const [isCompleted, setIsCompleted] = useState(element.isCompleted);
   const [showPopup, setShowPopup] = useState(false);
   const [errosMsg, setErrosMsg] = useState();
+  const [isLoading, setILoading] = useState(false);
 
   useDebounce(isCompleted, 1000, () => {
     todoUpdate({ ...element, isCompleted });
@@ -94,11 +95,18 @@ const TodoChild = ({ element, refetch, width }) => {
   };
 
   const todoUpdate = async ({ _id, isCompleted, text }) => {
-    await todoAPIAgent
-      .todoUpdate({ _id, isCompleted, text })
-      .catch((err) => setErrosMsg(err));
-    setShowPopup(false);
-    refetch();
+    setILoading(true);
+    try {
+      await todoAPIAgent
+        .todoUpdate({ _id, isCompleted, text })
+        .catch((err) => console.log(err))
+        .catch((err) => setErrosMsg(err));
+      setShowPopup(false);
+      refetch();
+      setILoading(false);
+    } catch (err) {
+      console.log(err);
+    }
   };
   return (
     <>

@@ -1,7 +1,12 @@
 import axios from "axios";
+import { getCookie } from "cookies-next";
 
+const token_id = getCookie("token");
 const todoAPIAxios = axios.create({
   baseURL: process.env.NEXT_ENVIRONMENT_URL,
+  headers: {
+    Authorization: `Bearer ${token_id}`,
+  },
 });
 
 const todoAPIAgent = {
@@ -20,10 +25,13 @@ const todoAPIAgent = {
     return todoAPIAxios.delete(`/todo-list/${id}`).then((res) => res.data);
   },
   todoUpdate: async ({ _id, isCompleted, text }) => {
-    return axios.patch(`${process.env.NEXT_ENVIRONMENT_URL}/todo-list/${_id}`, {
-      text,
-      isCompleted,
-    });
+    return todoAPIAxios.patch(
+      `${process.env.NEXT_ENVIRONMENT_URL}/todo-list/${_id}`,
+      {
+        text,
+        isCompleted,
+      }
+    );
   },
 };
 

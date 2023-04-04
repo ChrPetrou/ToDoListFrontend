@@ -67,7 +67,7 @@ const InputField = styled.div`
 `;
 
 const ErrorTag = styled.div`
-  color: ${colos.blue};
+  color: ${colos.tomato};
   font-size: 20px;
   font-weight: 900;
   margin-top: 5px;

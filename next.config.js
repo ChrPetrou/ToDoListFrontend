@@ -3,7 +3,7 @@ const nextConfig = {
   env: {
     NEXT_ENVIRONMENT_URL: process.env.NEXT_ENVIRONMENT_URL,
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
   compiler: {
     styledComponents: true,
   },
