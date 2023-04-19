@@ -69,8 +69,6 @@ const TaskManagment = styled.div`
   position: relative;
   & p,
   span {
-    /* text-decoration: ${({ isCompleted }) =>
-      isCompleted ? "line-through" : ""}; */
     font-size: 20px;
   }
 
@@ -90,14 +88,16 @@ const TodoChild = ({ element, refetch, width }) => {
   });
 
   const deleteSelf = async () => {
-    await todoAPIAgent.deleteTodo(element._id).catch((err) => setErrosMsg(err));
+    await todoAPIAgent()
+      .deleteTodo(element._id)
+      .catch((err) => setErrosMsg(err));
     refetch();
   };
 
   const todoUpdate = async ({ _id, isCompleted, text }) => {
     setILoading(true);
     try {
-      await todoAPIAgent
+      await todoAPIAgent()
         .todoUpdate({ _id, isCompleted, text })
         .catch((err) => console.log(err))
         .catch((err) => setErrosMsg(err));

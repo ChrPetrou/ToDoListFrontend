@@ -4,6 +4,7 @@ import colos from "../configs/colos";
 import Form from "../components/Form";
 import TodoChild from "../components/TodoChild";
 import todoAPIAgent from "../util/todoAPIAgent";
+import { getCookie } from "cookies-next";
 
 const Container = styled.div`
   display: flex;
@@ -59,7 +60,7 @@ export default function Todo() {
 
   const TodoFunction = async () => {
     try {
-      const todoList = await todoAPIAgent.getAllTodos();
+      const todoList = await todoAPIAgent().getAllTodos();
       setToDoList(todoList);
     } catch (err) {
       setErrosMsg(err);
@@ -67,13 +68,17 @@ export default function Todo() {
   };
 
   const todoAdd = async (value) => {
-    await todoAPIAgent.createTodo(value).catch((err) => setErrosMsg(err));
+    await todoAPIAgent()
+      .createTodo(value)
+      .catch((err) => setErrosMsg(err));
     TodoFunction();
   };
 
   useEffect(() => {
+    const token_id = getCookie("token");
+
     TodoFunction();
-  }, [toDoList]);
+  }, []);
 
   return (
     <Container>

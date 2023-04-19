@@ -44,19 +44,24 @@ const LogOutBtn = styled.div`
 
 const Layout = ({ children }) => {
   const router = useRouter();
+  const [isSigned, setIsSigned] = useState(false);
   const handleCookie = () => {
     removeCookies("token");
+    setIsSigned(false);
     router.push("/");
   };
 
+  useEffect(() => {
+    setIsSigned(hasCookie("token"));
+  }, [router]);
+
   return (
     <Container>
-      {hasCookie("token") && (
-        <NavBar>
+      <NavBar>
+        {isSigned && (
           <LogOutBtn onClick={() => handleCookie()}>Log out</LogOutBtn>
-        </NavBar>
-      )}
-
+        )}
+      </NavBar>
       {children}
     </Container>
   );

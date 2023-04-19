@@ -42,7 +42,7 @@ const ContainerInner = styled.div`
 
 const SignUpContainer = styled.div`
   display: flex;
-  overflow: scroll;
+  overflow: hidden;
   cursor: pointer;
   align-items: ${({ isToggle }) => (isToggle ? "center" : "flex-start")};
   justify-content: center;
@@ -50,9 +50,8 @@ const SignUpContainer = styled.div`
   position: absolute;
   bottom: 0;
   background: white;
+  padding: 0 30px;
   transition: all 0.25s linear;
-  /* margin-top: 50px; */
-  padding: 30px;
   width: 100%;
   height: ${({ isToggle }) => (isToggle ? "100%" : "50px")};
   color: ${colos.purble};
@@ -61,23 +60,24 @@ const SignUpContainer = styled.div`
 const SignUpContainerInner = styled.div`
   display: flex;
   flex-direction: column;
-
+  width: 100%;
   align-items: center;
   justify-content: center;
-  cursor: default;
+  cursor: ${({ isToggle }) => (isToggle ? "default" : "pointer")};
   color: ${colos.purble};
 `;
 
 const SignUp = () => {
   const [isToggle, setIsToggle] = useState(false);
-
-  const signInFunction = async (value) => {
+  const [errosMsg, setErrosMsg] = useState("");
+  const route = useRouter();
+  const signUpFunction = async (value) => {
     try {
-      const user = await UserAPIAgent.signIn(value);
+      const user = await UserAPIAgent.signUp(value);
       // localStorage.setItem("User", JSON.stringify(user.user));
-
-      setCookie("token", user?.tokenId, {
-        expires: new Date(user?.tokenExpire),
+      console.log(user);
+      setCookie("token", user?.token_id, {
+        expires: new Date(user?.expire_at),
       });
       route.push("/todos");
     } catch (err) {
@@ -88,9 +88,12 @@ const SignUp = () => {
 
   return (
     <SignUpContainer isToggle={isToggle} onClick={() => setIsToggle(!isToggle)}>
-      <SignUpContainerInner onClick={(e) => isToggle && e.stopPropagation()}>
+      <SignUpContainerInner
+        isToggle={isToggle}
+        onClick={(e) => isToggle && e.stopPropagation()}
+      >
         <h1> Sign Up</h1>
-        <SignUpForm onSubmit={signInFunction} />
+        <SignUpForm onSubmit={signUpFunction} />
       </SignUpContainerInner>
     </SignUpContainer>
   );
@@ -106,7 +109,7 @@ export default function Index() {
     try {
       const user = await UserAPIAgent.signIn(value);
       // localStorage.setItem("User", JSON.stringify(user.user));
-
+      console.log(user);
       setCookie("token", user?.tokenId, {
         expires: new Date(user?.tokenExpire),
       });

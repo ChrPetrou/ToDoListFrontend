@@ -11,7 +11,7 @@ const FormContainer = styled.div`
   padding: 20px;
 `;
 
-const FormContainerInner = styled.div`
+const FormContainerInner = styled.form`
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -60,6 +60,8 @@ const Button = styled.div`
   cursor: pointer;
   border: 0.5px solid white;
   transition: all 0.15s linear;
+  background: ${({ buttonBg }) => buttonBg};
+  color: ${({ buttonText }) => buttonText};
   :hover {
     background: rgba(9, 43, 95, 0.5);
   }
@@ -68,10 +70,7 @@ const Button = styled.div`
 export const SignForm = ({ onSubmit }) => {
   const SignUpSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Required"),
-    password: yup
-      .string()
-      .min(3, "Password is too short - should be 8 chars minimum.")
-      .required("Required"),
+    password: yup.string().min(3, "Password is too short").required("Required"),
   });
 
   return (
@@ -125,11 +124,8 @@ export const SignForm = ({ onSubmit }) => {
 export const SignUpForm = ({ onSubmit }) => {
   const SignUpSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Required"),
-    password: yup
-      .string()
-      .min(3, "Password is too short - should be 8 chars minimum.")
-      .required("Required"),
-    passwordConfirmation: yup
+    password: yup.string().min(3, "Password is too short").required("Required"),
+    confirmPassword: yup
       .string()
       .oneOf([yup.ref("password"), null], "Passwords must match")
       .required("Required"),
@@ -138,20 +134,21 @@ export const SignUpForm = ({ onSubmit }) => {
   return (
     <FormContainer>
       <Formik
-        initialValues={{ email: "", password: "", passwordConfirmation: "" }}
+        initialValues={{ email: "", password: "", confirmPassword: "" }}
         validationSchema={SignUpSchema}
         onSubmit={(values) => {
           onSubmit(values);
-          // console.log(email, password);
         }}
         validateOnChange={true}
         validateOnMount={false}
       >
         {({ errors, touched, handleChange, handleSubmit, values }) => (
-          <FormContainerInner>
+          <FormContainerInner
+            backgroundClr={colos.purble}
+            textClr={colos.lightGrey}
+          >
             <InputField>
               <input
-                autoComplete="off"
                 name="email"
                 type="email"
                 onChange={handleChange}
@@ -164,7 +161,6 @@ export const SignUpForm = ({ onSubmit }) => {
             </InputField>
             <InputField>
               <input
-                autoComplete="off"
                 name="password"
                 type="password"
                 onChange={handleChange}
@@ -177,18 +173,23 @@ export const SignUpForm = ({ onSubmit }) => {
             </InputField>
             <InputField>
               <input
-                autoComplete="off"
-                name="passwordConfirmation"
+                name="confirmPassword"
                 type="password"
                 onChange={handleChange}
                 placeholder={`Confirm Password`}
-                value={values.passwordConfirmation}
+                value={values.confirmPassword}
               />
-              {errors.passwordConfirmation && touched.passwordConfirmation && (
-                <ErrorTag>{errors.passwordConfirmation} </ErrorTag>
+              {errors.confirmPassword && touched.confirmPassword && (
+                <ErrorTag>{errors.confirmPassword} </ErrorTag>
               )}
             </InputField>
-            <Button onClick={() => handleSubmit()}>Sign up</Button>
+            <Button
+              buttonBg={colos.purble}
+              buttonText={colos.lightGrey}
+              onClick={() => handleSubmit()}
+            >
+              Sign up
+            </Button>
           </FormContainerInner>
         )}
       </Formik>

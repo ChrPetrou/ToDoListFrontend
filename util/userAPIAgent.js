@@ -13,4 +13,13 @@ export const UserAPIAgent = {
       })
       .then((res) => res.data);
   },
+  signUp: async ({ email, password, confirmPassword }) => {
+    return userAPIAxios
+      .post("/users/register/", {
+        email,
+        password,
+        confirmPassword,
+      })
+      .then((res) => res.data);
+  },
 };
